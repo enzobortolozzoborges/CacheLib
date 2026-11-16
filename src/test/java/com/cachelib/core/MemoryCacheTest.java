@@ -86,7 +86,7 @@ class MemoryCacheTest {
         cache.put("a", 1);
         clock.advance(Duration.ofSeconds(6));
         cache.put("b", 2);
-        clock.advance(Duration.ofSeconds(5));   // "a" expira, "b" ainda vale
+        clock.advance(Duration.ofSeconds(5));
         cache.put("c", 3);
 
         assertEquals(List.of(RemovalCause.EXPIRED), causes);

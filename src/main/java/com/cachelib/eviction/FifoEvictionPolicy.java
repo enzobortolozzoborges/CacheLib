@@ -16,7 +16,7 @@ public final class FifoEvictionPolicy<K> implements EvictionPolicy<K> {
 
     @Override
     public void onAccess(K key) {
-        // FIFO ignora leituras por definição.
+
     }
 
     @Override

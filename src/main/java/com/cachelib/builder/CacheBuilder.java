@@ -6,20 +6,25 @@ import com.cachelib.core.MemoryCache;
 import com.cachelib.eviction.EvictionPolicy;
 import com.cachelib.eviction.LruEvictionPolicy;
 import com.cachelib.listener.CacheListener;
+import com.cachelib.listener.NotificationStrategy;
+import com.cachelib.listener.Notifications;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.ToLongBiFunction;
 
 public final class CacheBuilder<K, V> {
 
-    private static final int DEFAULT_MAX_ENTRIES = 100;
+    private static final long DEFAULT_CAPACITY = 100;
 
-    private int maxEntries = DEFAULT_MAX_ENTRIES;
+    private long capacity = DEFAULT_CAPACITY;
+    private ToLongBiFunction<K, V> weigher = (k, v) -> 1L;
     private Duration ttl;
     private Clock clock = Clock.systemUTC();
     private EvictionPolicy<K> evictionPolicy = new LruEvictionPolicy<>();
+    private NotificationStrategy<K, V> notifier = Notifications.synchronous();
     private final List<CacheListener<K, V>> listeners = new ArrayList<>();
 
     private CacheBuilder() {
@@ -33,7 +38,20 @@ public final class CacheBuilder<K, V> {
         if (maxEntries <= 0) {
             throw new IllegalArgumentException("maxEntries deve ser positivo");
         }
-        this.maxEntries = maxEntries;
+        this.capacity = maxEntries;
+        this.weigher = (k, v) -> 1L;
+        return this;
+    }
+
+    public CacheBuilder<K, V> maxWeight(long maxWeight, ToLongBiFunction<K, V> weigher) {
+        if (maxWeight <= 0) {
+            throw new IllegalArgumentException("maxWeight deve ser positivo");
+        }
+        if (weigher == null) {
+            throw new IllegalArgumentException("weigher não pode ser nulo");
+        }
+        this.capacity = maxWeight;
+        this.weigher = weigher;
         return this;
     }
 
@@ -50,6 +68,14 @@ public final class CacheBuilder<K, V> {
             throw new IllegalArgumentException("evictionPolicy não pode ser nula");
         }
         this.evictionPolicy = evictionPolicy;
+        return this;
+    }
+
+    public CacheBuilder<K, V> notificationStrategy(NotificationStrategy<K, V> notifier) {
+        if (notifier == null) {
+            throw new IllegalArgumentException("notificationStrategy não pode ser nula");
+        }
+        this.notifier = notifier;
         return this;
     }
 
@@ -70,6 +96,7 @@ public final class CacheBuilder<K, V> {
     }
 
     public Cache<K, V> build() {
-        return new MemoryCache<>(new CacheConfig<>(maxEntries, ttl, clock, evictionPolicy, listeners));
+        return new MemoryCache<>(new CacheConfig<>(
+                capacity, weigher, ttl, clock, evictionPolicy, listeners, notifier));
     }
 }
