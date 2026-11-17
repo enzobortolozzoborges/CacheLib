@@ -13,13 +13,9 @@ O cache roda no mesmo processo da aplicação cliente e oferece:
 
 ## Alunos
 
-- [Nome completo do aluno 1]
-- [Nome completo do aluno 2]
-- [Nome completo do aluno 3]
-
-## Vídeo de apresentação
-
-[Link do vídeo no YouTube (não listado)]
+- Davi Batista Amaral
+- Enzo Bortolozzo Borges
+- Henrique Fugikawa Abe
 
 ## Requisitos
 
@@ -96,11 +92,11 @@ Valores inválidos lançam `IllegalArgumentException`, por exemplo `maxEntries(0
 ```java
 cache.put("chave", valor);                       // usa o TTL padrão
 cache.put("chave", valor, Duration.ofSeconds(30)); // TTL próprio desta entrada
-        cache.put("chave", valor, null);                 // esta entrada não expira
+cache.put("chave", valor, null);                 // esta entrada não expira
 cache.get("chave");                              // Optional com o valor, ou vazio
 cache.remove("chave");                           // true se existia
 cache.size();                                    // quantidade de entradas
-cache.setEvictionPolicy(new com.cachelib.eviction.LruEvictionPolicy<>()); // troca a política em uso
+cache.setEvictionPolicy(new LruEvictionPolicy<>()); // troca a política em uso
 ```
 
 Ao substituir o valor de uma chave já existente, nenhum aviso de remoção é enviado, porque não houve remoção.
@@ -268,29 +264,17 @@ public class ContadorDeEvicoes implements CacheListener<String, String> {
 
 ### Estratégia de notificação própria
 
-Esta estratégia entrega ao listener apenas as remoções que não foram pedidas pelo próprio cliente (`EXPLICIT` fica de fora):
-
 ```java
-import com.cachelib.listener.CacheListener;
 import com.cachelib.listener.NotificationStrategy;
-import com.cachelib.listener.RemovalCause;
 import com.cachelib.listener.RemovalEvent;
+import com.cachelib.listener.CacheListener;
+import java.util.List;
 
-NotificationStrategy<String, String> somenteAutomaticas = (eventos, listeners) -> {
+NotificationStrategy<String, String> registrarAuditoria = (eventos, listeners) -> {
     for (RemovalEvent<String, String> evento : eventos) {
-        if (evento.cause() == RemovalCause.EXPLICIT) {
-            continue;
-        }
-        for (CacheListener<String, String> listener : listeners) {
-            listener.onRemoval(evento.key(), evento.value(), evento.cause());
-        }
+        auditoria.gravar(evento.key(), evento.cause());
     }
 };
-
-Cache<String, String> cache = CacheBuilder.<String, String>newBuilder()
-        .notificationStrategy(somenteAutomaticas)
-        .addListener((chave, valor, motivo) -> System.out.println(chave + " saiu: " + motivo))
-        .build();
 ```
 
 ## Exemplo completo
