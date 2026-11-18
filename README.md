@@ -29,7 +29,7 @@ O cache roda no mesmo processo da aplicação cliente e oferece:
 ## Instalação
 
 ```bash
-git clone [URL do repositório]
+git clone https://github.com/enzobortolozzoborges/CacheLib.git
 cd CacheLib
 mvn install
 ```
