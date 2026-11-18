@@ -48,6 +48,11 @@ public class ExemploPratico {
         relogio.avancar(Duration.ofMinutes(11));
         catalogo.precoDe(1L);
 
+        cache.put(9L, new Produto(9L, "Teclado", 150.0));
+        System.out.println("get(9): " + cache.get(9L).isPresent());
+        cache.remove(9L);
+        System.out.println("após remove: " + cache.get(9L).isPresent());
+
         System.out.println("\n== Resumo ==");
         System.out.println("Consultas ao banco: " + banco.consultas());
         System.out.println("Estatísticas do cache: " + estatisticas);

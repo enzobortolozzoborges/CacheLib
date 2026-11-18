@@ -17,6 +17,10 @@ O cache roda no mesmo processo da aplicação cliente e oferece:
 - Enzo Bortolozzo Borges
 - Henrique Fugikawa Abe
 
+## Link do YouTube
+
+- https://youtu.be/-tHhFjNDOAo
+
 ## Requisitos
 
 - Java 17 ou superior
